@@ -1,22 +1,18 @@
-name: "code quality PR check"
+name: "Build"
 
 on:
-  pull_request:
-    paths:
-      - "src/**"
-      - "package-lock.json"
-      - "tests/**"
-      - "dist/**"
-      - "tsconfig.json"
-      - .github/workflows/code-quality-pr-check.yml
+  push:
     branches: [main]
+  pull_request:
+  merge_group:
+    branches: ["**"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "16"
           cache: "npm"
@@ -38,8 +34,8 @@ jobs:
         os: ["ubuntu-latest", "windows-latest", "macos-latest"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "16"
           cache: "npm"
@@ -58,15 +54,13 @@ jobs:
   otel-export-trace:
     needs: [tests, build]
     if: always()
-    name: OpenTelemetry Export Trace
+    name: OpenTelemetry Export Traces
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: export trace
+      - uses: actions/checkout@v4
+      - name: Export traces
         uses: ./
         with:
-          otlpEndpoint: "TEST"
-          otlpHeaders: "TEST"
+          otlpEndpoint: ${{ secrets.OTLP_ENDPOINT }}
+          otlpHeaders: ${{ secrets.OTLP_HEADERS }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          OTEL_CONSOLE_ONLY: "true"
