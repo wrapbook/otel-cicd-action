@@ -11,7 +11,7 @@ import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions"
 import { WorkflowRunJobs } from "../github";
 import { Resource } from "@opentelemetry/resources";
 
-const OTEL_CONSOLE_ONLY = process.env.OTEL_CONSOLE_ONLY === "true";
+const OTEL_CONSOLE_ONLY = process.env["OTEL_CONSOLE_ONLY"] === "true";
 
 type StringDict = { [key: string]: string };
 
@@ -38,7 +38,7 @@ export function createTracerProvider(
   otlpEndpoint: string,
   otlpHeaders: string,
   workflowRunJobs: WorkflowRunJobs,
-  otelServiceName?: string | null | undefined
+  otelServiceName?: string | null | undefined,
 ) {
   const serviceName =
     otelServiceName ||

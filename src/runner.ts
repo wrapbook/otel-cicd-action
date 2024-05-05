@@ -9,10 +9,10 @@ export async function run() {
   const otlpEndpoint = core.getInput("otlpEndpoint");
   const otlpHeaders = core.getInput("otlpHeaders");
   const otelServiceName =
-    core.getInput("otelServiceName") || process.env.OTEL_SERVICE_NAME || "";
+    core.getInput("otelServiceName") || process.env["OTEL_SERVICE_NAME"] || "";
   const runId = parseInt(core.getInput("runId") || `${ghContext.runId}`);
   const ghToken =
-    core.getInput("githubToken") || process.env.GITHUB_TOKEN || "";
+    core.getInput("githubToken") || process.env["GITHUB_TOKEN"] || "";
   const octokit = github.getOctokit(ghToken);
 
   core.info(`Get Workflow Run Jobs for ${runId}`);
@@ -24,12 +24,12 @@ export async function run() {
     otlpEndpoint,
     otlpHeaders,
     workflowRunJobs,
-    otelServiceName
+    otelServiceName,
   );
 
   try {
     core.info(
-      `Trace Workflow Run Jobs for ${runId} and export to ${otlpEndpoint}`
+      `Trace Workflow Run Jobs for ${runId} and export to ${otlpEndpoint}`,
     );
     const spanContext = await traceWorkflowRunJobs({
       provider,
