@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTracerProvider = void 0;
+exports.createTracerProvider = exports.stringToHeader = void 0;
 const grpc = __importStar(require("@grpc/grpc-js"));
 const sdk_trace_base_1 = require("@opentelemetry/sdk-trace-base");
 const exporter_trace_otlp_grpc_1 = require("@opentelemetry/exporter-trace-otlp-grpc");
@@ -34,7 +34,7 @@ const OTEL_CONSOLE_ONLY = process.env["OTEL_CONSOLE_ONLY"] === "true";
 function stringToHeader(value) {
     const pairs = value.split(",");
     return pairs.reduce((result, item) => {
-        const [key, value] = item.split("=");
+        const [key, value] = item.split(/=(.*)/s);
         if (key && value) {
             return {
                 ...result,
@@ -45,6 +45,7 @@ function stringToHeader(value) {
         return result;
     }, {});
 }
+exports.stringToHeader = stringToHeader;
 function isHttpEndpoint(endpoint) {
     return endpoint.startsWith("https://");
 }

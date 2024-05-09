@@ -91731,7 +91731,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createTracerProvider = void 0;
+exports.createTracerProvider = exports.stringToHeader = void 0;
 const grpc = __importStar(__nccwpck_require__(7025));
 const sdk_trace_base_1 = __nccwpck_require__(29253);
 const exporter_trace_otlp_grpc_1 = __nccwpck_require__(60160);
@@ -91742,7 +91742,7 @@ const OTEL_CONSOLE_ONLY = process.env["OTEL_CONSOLE_ONLY"] === "true";
 function stringToHeader(value) {
     const pairs = value.split(",");
     return pairs.reduce((result, item) => {
-        const [key, value] = item.split("=");
+        const [key, value] = item.split(/=(.*)/s);
         if (key && value) {
             return {
                 ...result,
@@ -91753,6 +91753,7 @@ function stringToHeader(value) {
         return result;
     }, {});
 }
+exports.stringToHeader = stringToHeader;
 function isHttpEndpoint(endpoint) {
     return endpoint.startsWith("https://");
 }

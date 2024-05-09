@@ -1,4 +1,4 @@
-import { createTracerProvider } from "./trace";
+import { createTracerProvider, stringToHeader } from "./trace";
 import { WorkflowRunJobs } from "../github";
 import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
 import { BasicTracerProvider } from "@opentelemetry/sdk-trace-base";
@@ -115,5 +115,22 @@ describe("createTracerProvider", () => {
     );
     const spanProcessor = subject.getActiveSpanProcessor();
     expect(spanProcessor).toBeDefined();
+  });
+});
+
+describe("stringToHeader", () => {
+  it("should parse one header", () => {
+    const headers = stringToHeader("aaa=bbb");
+    expect(headers).toEqual({ aaa: "bbb" });
+  });
+
+  it("should parse multiple headers", () => {
+    const headers = stringToHeader("aaa=bbb,ccc=ddd");
+    expect(headers).toEqual({ aaa: "bbb", ccc: "ddd" });
+  });
+
+  it("should parse base64 encoded header with =", () => {
+    const headers = stringToHeader("aaa=bnVsbA==");
+    expect(headers).toEqual({ aaa: "bnVsbA==" });
   });
 });

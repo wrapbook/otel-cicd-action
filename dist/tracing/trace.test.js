@@ -63,4 +63,18 @@ describe("createTracerProvider", () => {
         expect(spanProcessor).toBeDefined();
     });
 });
+describe("stringToHeader", () => {
+    it("should parse one header", () => {
+        const headers = (0, trace_1.stringToHeader)("aaa=bbb");
+        expect(headers).toEqual({ aaa: "bbb" });
+    });
+    it("should parse multiple headers", () => {
+        const headers = (0, trace_1.stringToHeader)("aaa=bbb,ccc=ddd");
+        expect(headers).toEqual({ aaa: "bbb", ccc: "ddd" });
+    });
+    it("should parse base64 encoded header with =", () => {
+        const headers = (0, trace_1.stringToHeader)("aaa=bnVsbA==");
+        expect(headers).toEqual({ aaa: "bnVsbA==" });
+    });
+});
 //# sourceMappingURL=trace.test.js.map
