@@ -45,7 +45,7 @@ export async function traceWorkflowRunJobs({
     baseRef = workflowRunJobs.workflowRun.pull_requests[0].base?.ref;
     baseSha = workflowRunJobs.workflowRun.pull_requests[0].base?.sha;
 
-    workflowRunJobs.jobs.forEach((job) => console.log(job.labels));
+    console.log(workflowRunJobs.workflowRun);
     pull_requests = workflowRunJobs.workflowRun.pull_requests.reduce(
       (result, pr, idx) => {
         const prefix = `github.pull_requests.${idx}`;
