@@ -27,8 +27,10 @@ exports.traceWorkflowRunJobs = void 0;
 const api_1 = require("@opentelemetry/api");
 const core = __importStar(require("@actions/core"));
 const step_1 = require("./step");
+const github_1 = require("@actions/github");
 async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
     const tracer = provider.getTracer("otel-cicd-action");
+    const octokit = (0, github_1.getOctokit)(core.getInput("github-token"));
     const startTime = new Date(workflowRunJobs.workflowRun.run_started_at ||
         workflowRunJobs.workflowRun.created_at);
     let headRef = undefined;
@@ -40,7 +42,13 @@ async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
         headRef = workflowRunJobs.workflowRun.pull_requests[0].head?.ref;
         baseRef = workflowRunJobs.workflowRun.pull_requests[0].base?.ref;
         baseSha = workflowRunJobs.workflowRun.pull_requests[0].base?.sha;
-        console.log(workflowRunJobs.workflowRun);
+        const prNumber = workflowRunJobs.workflowRun.pull_requests[0].number;
+        const labels = await octokit.rest.issues.listLabelsOnIssue({
+            owner: github_1.context.repo.owner,
+            repo: github_1.context.repo.repo,
+            issue_number: prNumber,
+        });
+        console.log(labels);
         pull_requests = workflowRunJobs.workflowRun.pull_requests.reduce((result, pr, idx) => {
             const prefix = `github.pull_requests.${idx}`;
             // igonre @ts-expect-error I'm not sure how to fix this
