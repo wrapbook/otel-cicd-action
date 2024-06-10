@@ -30,7 +30,7 @@ const step_1 = require("./step");
 const github_1 = require("@actions/github");
 async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
     const tracer = provider.getTracer("otel-cicd-action");
-    const octokit = (0, github_1.getOctokit)(core.getInput("github-token"));
+    const octokit = (0, github_1.getOctokit)(core.getInput("githubToken"));
     const startTime = new Date(workflowRunJobs.workflowRun.run_started_at ||
         workflowRunJobs.workflowRun.created_at);
     let headRef = undefined;

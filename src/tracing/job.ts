@@ -31,7 +31,7 @@ export async function traceWorkflowRunJobs({
 }: TraceWorkflowRunJobsParams): Promise<SpanContext> {
   const tracer = provider.getTracer("otel-cicd-action");
 
-  const octokit = getOctokit(core.getInput("github-token"));
+  const octokit = getOctokit(core.getInput("githubToken"));
 
   const startTime = new Date(
     workflowRunJobs.workflowRun.run_started_at ||
