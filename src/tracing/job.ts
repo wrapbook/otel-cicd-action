@@ -44,6 +44,7 @@ export async function traceWorkflowRunJobs({
     headRef = workflowRunJobs.workflowRun.pull_requests[0].head?.ref;
     baseRef = workflowRunJobs.workflowRun.pull_requests[0].base?.ref;
     baseSha = workflowRunJobs.workflowRun.pull_requests[0].base?.sha;
+
     pull_requests = workflowRunJobs.workflowRun.pull_requests.reduce(
       (result, pr, idx) => {
         const prefix = `github.pull_requests.${idx}`;
@@ -52,7 +53,7 @@ export async function traceWorkflowRunJobs({
           [`${prefix}.id`]: pr.id,
           [`${prefix}.url`]: pr.url,
           [`${prefix}.number`]: pr.number,
-          [`${prefix}.labels`]: pr.labels.map((l: { name: string }) => l.name).join(", "),
+          [`${prefix}.labels`]: "testing",
           [`${prefix}.head.sha`]: pr.head.sha,
           [`${prefix}.head.ref`]: pr.head.ref,
           [`${prefix}.head.repo.id`]: pr.head.repo.id,

@@ -47,6 +47,7 @@ async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
                 [`${prefix}.id`]: pr.id,
                 [`${prefix}.url`]: pr.url,
                 [`${prefix}.number`]: pr.number,
+                [`${prefix}.labels`]: "testing",
                 [`${prefix}.head.sha`]: pr.head.sha,
                 [`${prefix}.head.ref`]: pr.head.ref,
                 [`${prefix}.head.repo.id`]: pr.head.repo.id,
