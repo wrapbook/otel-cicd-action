@@ -43,12 +43,12 @@ async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
         baseRef = workflowRunJobs.workflowRun.pull_requests[0].base?.ref;
         baseSha = workflowRunJobs.workflowRun.pull_requests[0].base?.sha;
         const prNumber = workflowRunJobs.workflowRun.pull_requests[0].number;
-        const labels = await octokit.rest.issues.listLabelsOnIssue({
+        const labelRequest = await octokit.rest.issues.listLabelsOnIssue({
             owner: github_1.context.repo.owner,
             repo: github_1.context.repo.repo,
             issue_number: prNumber,
         });
-        console.log(labels);
+        const labels = labelRequest.data.map((l) => l.name).join(", ");
         pull_requests = workflowRunJobs.workflowRun.pull_requests.reduce((result, pr, idx) => {
             const prefix = `github.pull_requests.${idx}`;
             // igonre @ts-expect-error I'm not sure how to fix this
@@ -59,7 +59,7 @@ async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
                 [`${prefix}.url`]: pr.url,
                 [`${prefix}.number`]: pr.number,
                 // eslint-disable-next-line
-                [`${prefix}.labels`]: "label",
+                [`${prefix}.labels`]: labels,
                 [`${prefix}.head.sha`]: pr.head.sha,
                 [`${prefix}.head.ref`]: pr.head.ref,
                 [`${prefix}.head.repo.id`]: pr.head.repo.id,

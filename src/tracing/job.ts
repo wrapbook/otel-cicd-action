@@ -51,12 +51,12 @@ export async function traceWorkflowRunJobs({
 
     const prNumber = workflowRunJobs.workflowRun.pull_requests[0].number;
 
-    const labels = await octokit.rest.issues.listLabelsOnIssue({
+    const labelRequest = await octokit.rest.issues.listLabelsOnIssue({
       owner: context.repo.owner,
       repo: context.repo.repo,
       issue_number: prNumber,
     });
-    console.log(labels);
+    const labels = labelRequest.data.map((l) => l.name).join(", ");
 
     pull_requests = workflowRunJobs.workflowRun.pull_requests.reduce(
       (result, pr, idx) => {
@@ -70,7 +70,7 @@ export async function traceWorkflowRunJobs({
           [`${prefix}.url`]: pr.url,
           [`${prefix}.number`]: pr.number,
           // eslint-disable-next-line
-          [`${prefix}.labels`]: "label",
+          [`${prefix}.labels`]: labels,
           [`${prefix}.head.sha`]: pr.head.sha,
           [`${prefix}.head.ref`]: pr.head.ref,
           [`${prefix}.head.repo.id`]: pr.head.repo.id,
