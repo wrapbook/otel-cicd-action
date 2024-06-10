@@ -52,6 +52,7 @@ export async function traceWorkflowRunJobs({
           [`${prefix}.id`]: pr.id,
           [`${prefix}.url`]: pr.url,
           [`${prefix}.number`]: pr.number,
+          [`${prefix}.labels`]: pr.labels.map((l: { name: string }) => l.name).join(", "),
           [`${prefix}.head.sha`]: pr.head.sha,
           [`${prefix}.head.ref`]: pr.head.ref,
           [`${prefix}.head.repo.id`]: pr.head.repo.id,
