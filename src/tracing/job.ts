@@ -61,15 +61,11 @@ export async function traceWorkflowRunJobs({
     pull_requests = workflowRunJobs.workflowRun.pull_requests.reduce(
       (result, pr, idx) => {
         const prefix = `github.pull_requests.${idx}`;
-
-        // igonre @ts-expect-error I'm not sure how to fix this
-        // const labels = pr.labels.map((l) => l.name).join(", ");
         return {
           ...result,
           [`${prefix}.id`]: pr.id,
           [`${prefix}.url`]: pr.url,
           [`${prefix}.number`]: pr.number,
-          // eslint-disable-next-line
           [`${prefix}.labels`]: labels,
           [`${prefix}.head.sha`]: pr.head.sha,
           [`${prefix}.head.ref`]: pr.head.ref,
