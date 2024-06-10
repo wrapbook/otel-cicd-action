@@ -40,9 +40,9 @@ async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
         headRef = workflowRunJobs.workflowRun.pull_requests[0].head?.ref;
         baseRef = workflowRunJobs.workflowRun.pull_requests[0].base?.ref;
         baseSha = workflowRunJobs.workflowRun.pull_requests[0].base?.sha;
+        console.log(workflowRunJobs);
         pull_requests = workflowRunJobs.workflowRun.pull_requests.reduce((result, pr, idx) => {
             const prefix = `github.pull_requests.${idx}`;
-            console.log(pr);
             // igonre @ts-expect-error I'm not sure how to fix this
             // const labels = pr.labels.map((l) => l.name).join(", ");
             return {
