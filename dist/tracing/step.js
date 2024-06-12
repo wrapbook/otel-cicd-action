@@ -40,8 +40,8 @@ async function traceWorkflowRunStep({ job, parentContext, parentSpan, trace, tra
     const ignoredSteps = core
         .getInput("ignoredSteps")
         .split(",")
-        .map((s) => s.trim());
-    if (ignoredSteps.some((ignoredStep) => step.name.startsWith(ignoredStep))) {
+        .map((s) => s.trim().toLowerCase());
+    if (ignoredSteps.some((ignoredStep) => step.name.toLowerCase().startsWith(ignoredStep))) {
         console.info(`Step ${step.name} is ignored.`);
         return;
     }
