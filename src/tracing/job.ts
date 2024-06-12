@@ -18,6 +18,8 @@ import {
 
 import { traceWorkflowRunStep } from "./step";
 
+import { getOctokit, context } from "@actions/github";
+
 export type TraceWorkflowRunJobsParams = {
   provider: BasicTracerProvider;
   workflowRunJobs: WorkflowRunJobs;
@@ -28,6 +30,8 @@ export async function traceWorkflowRunJobs({
   workflowRunJobs,
 }: TraceWorkflowRunJobsParams): Promise<SpanContext> {
   const tracer = provider.getTracer("otel-cicd-action");
+
+  const octokit = getOctokit(core.getInput("githubToken"));
 
   const startTime = new Date(
     workflowRunJobs.workflowRun.run_started_at ||
@@ -44,6 +48,16 @@ export async function traceWorkflowRunJobs({
     headRef = workflowRunJobs.workflowRun.pull_requests[0].head?.ref;
     baseRef = workflowRunJobs.workflowRun.pull_requests[0].base?.ref;
     baseSha = workflowRunJobs.workflowRun.pull_requests[0].base?.sha;
+
+    const prNumber = workflowRunJobs.workflowRun.pull_requests[0].number;
+
+    const labelRequest = await octokit.rest.issues.listLabelsOnIssue({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      issue_number: prNumber,
+    });
+    const labels = labelRequest.data.map((l) => l.name).join(", ");
+
     pull_requests = workflowRunJobs.workflowRun.pull_requests.reduce(
       (result, pr, idx) => {
         const prefix = `github.pull_requests.${idx}`;
@@ -52,6 +66,7 @@ export async function traceWorkflowRunJobs({
           [`${prefix}.id`]: pr.id,
           [`${prefix}.url`]: pr.url,
           [`${prefix}.number`]: pr.number,
+          [`${prefix}.labels`]: labels,
           [`${prefix}.head.sha`]: pr.head.sha,
           [`${prefix}.head.ref`]: pr.head.ref,
           [`${prefix}.head.repo.id`]: pr.head.repo.id,
