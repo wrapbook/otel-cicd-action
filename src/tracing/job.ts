@@ -194,6 +194,15 @@ async function traceWorkflowRunJob({
     console.warn(`Job ${job.id} is not completed yet`);
     return;
   }
+
+  if (
+    core.getInput("ignoreSkippedJobs") != "false" &&
+    job.conclusion === "skipped"
+  ) {
+    console.info(`Job ${job.id} was skipped, not tracing.`);
+    return;
+  }
+
   job.name;
   const ctx = trace.setSpan(parentContext, parentSpan);
   const startTime = new Date(job.started_at);

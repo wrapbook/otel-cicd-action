@@ -26,6 +26,10 @@ inputs:
   ignoredSteps:
     description: Comma separated array of step names that will not be traced
     required: false
+  ignoreSkippedJobs:
+    description: Ignore skipped jobs
+    required: false
+    default: "false"
 outputs:
   traceId:
     description: The OpenTelemetry Trace ID for this Trace
