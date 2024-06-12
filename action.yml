@@ -30,6 +30,11 @@ inputs:
     description: Ignore skipped jobs
     required: false
     default: "false"
+  enableStepTracing:
+    default: "true"
+    description: Enable tracing for each step
+    required: false
+
 outputs:
   traceId:
     description: The OpenTelemetry Trace ID for this Trace

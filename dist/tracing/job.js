@@ -182,7 +182,7 @@ async function traceWorkflowRunJob({ parentContext, trace, parentSpan, tracer, j
         span.setStatus({ code });
         const numSteps = job.steps?.length || 0;
         core.debug(`Trace ${numSteps} Steps`);
-        if (job.steps !== undefined) {
+        if (job.steps !== undefined && core.getBooleanInput("enableStepTracing")) {
             for (let i = 0; i < job.steps.length; i++) {
                 const step = job.steps[i];
                 await (0, step_1.traceWorkflowRunStep)({
