@@ -157,14 +157,18 @@ export async function traceWorkflowRunJobs({
 
     for (let i = 0; i < workflowRunJobs.jobs.length; i++) {
       const job = workflowRunJobs.jobs[i];
-      await traceWorkflowRunJob({
-        parentSpan: rootSpan,
-        parentContext: ROOT_CONTEXT,
-        trace,
-        tracer,
-        job,
-        workflowArtifacts: workflowRunJobs.workflowRunArtifacts,
-      });
+      if (workflowRunJobs.jobs[i].conclusion === "skipped") {
+        core.info(`Job ${job.id} was skipped, not tracing.`);
+      } else {
+        await traceWorkflowRunJob({
+          parentSpan: rootSpan,
+          parentContext: ROOT_CONTEXT,
+          trace,
+          tracer,
+          job,
+          workflowArtifacts: workflowRunJobs.workflowRunArtifacts,
+        });
+      }
     }
   } finally {
     rootSpan.end(new Date(workflowRunJobs.workflowRun.updated_at));
