@@ -199,13 +199,13 @@ async function traceWorkflowRunJob({
     return;
   }
 
-  if (
-    core.getBooleanInput("ignoreSkippedJobs") &&
-    job.conclusion === "skipped"
-  ) {
-    console.info(`Job ${job.id} was skipped, not tracing.`);
-    return;
-  }
+  // if (
+  //   core.getBooleanInput("ignoreSkippedJobs") &&
+  //   job.conclusion === "skipped"
+  // ) {
+  //   console.info(`Job ${job.id} was skipped, not tracing.`);
+  //   return;
+  // }
 
   job.name;
   const ctx = trace.setSpan(parentContext, parentSpan);
