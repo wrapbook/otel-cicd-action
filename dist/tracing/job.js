@@ -150,13 +150,6 @@ async function traceWorkflowRunJob({ parentContext, trace, parentSpan, tracer, j
         console.warn(`Job ${job.id} is not completed yet`);
         return;
     }
-    // if (
-    //   core.getBooleanInput("ignoreSkippedJobs") &&
-    //   job.conclusion === "skipped"
-    // ) {
-    //   console.info(`Job ${job.id} was skipped, not tracing.`);
-    //   return;
-    // }
     job.name;
     const ctx = trace.setSpan(parentContext, parentSpan);
     const startTime = new Date(job.started_at);
@@ -190,8 +183,6 @@ async function traceWorkflowRunJob({ parentContext, trace, parentSpan, tracer, j
         const numSteps = job.steps?.length || 0;
         core.debug(`Trace ${numSteps} Steps`);
         const enableStepTracing = core.getBooleanInput("enableStepTracing");
-        if (!enableStepTracing)
-            core.info("Step tracing is disabled. To enable, set `enableStepTracing` to true.");
         if (job.steps !== undefined && enableStepTracing) {
             for (let i = 0; i < job.steps.length; i++) {
                 const step = job.steps[i];

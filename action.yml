@@ -26,10 +26,6 @@ inputs:
   ignoredSteps:
     description: Comma separated array of step names that will not be traced
     required: false
-  ignoreSkippedJobs:
-    description: Ignore skipped jobs
-    required: false
-    default: "false"
   enableStepTracing:
     default: "true"
     description: Enable tracing for each step
