@@ -123,14 +123,19 @@ async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
         }
         for (let i = 0; i < workflowRunJobs.jobs.length; i++) {
             const job = workflowRunJobs.jobs[i];
-            await traceWorkflowRunJob({
-                parentSpan: rootSpan,
-                parentContext: api_1.ROOT_CONTEXT,
-                trace: api_1.trace,
-                tracer,
-                job,
-                workflowArtifacts: workflowRunJobs.workflowRunArtifacts,
-            });
+            if (workflowRunJobs.jobs[i].conclusion === "skipped") {
+                core.info(`Job ${job.id} was skipped, not tracing.`);
+            }
+            else {
+                await traceWorkflowRunJob({
+                    parentSpan: rootSpan,
+                    parentContext: api_1.ROOT_CONTEXT,
+                    trace: api_1.trace,
+                    tracer,
+                    job,
+                    workflowArtifacts: workflowRunJobs.workflowRunArtifacts,
+                });
+            }
         }
     }
     finally {
@@ -177,7 +182,8 @@ async function traceWorkflowRunJob({ parentContext, trace, parentSpan, tracer, j
         span.setStatus({ code });
         const numSteps = job.steps?.length || 0;
         core.debug(`Trace ${numSteps} Steps`);
-        if (job.steps !== undefined) {
+        const enableStepTracing = core.getBooleanInput("enableStepTracing");
+        if (job.steps !== undefined && enableStepTracing) {
             for (let i = 0; i < job.steps.length; i++) {
                 const step = job.steps[i];
                 await (0, step_1.traceWorkflowRunStep)({

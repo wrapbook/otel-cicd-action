@@ -23,6 +23,14 @@ inputs:
   runId:
     description: Workflow Run ID to Export. Defaults to env.GITHUB_RUN_ID
     required: false
+  ignoredSteps:
+    description: Comma separated array of step names that will not be traced
+    required: false
+  enableStepTracing:
+    default: "true"
+    description: Enable tracing for each step
+    required: false
+
 outputs:
   traceId:
     description: The OpenTelemetry Trace ID for this Trace

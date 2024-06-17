@@ -157,14 +157,18 @@ export async function traceWorkflowRunJobs({
 
     for (let i = 0; i < workflowRunJobs.jobs.length; i++) {
       const job = workflowRunJobs.jobs[i];
-      await traceWorkflowRunJob({
-        parentSpan: rootSpan,
-        parentContext: ROOT_CONTEXT,
-        trace,
-        tracer,
-        job,
-        workflowArtifacts: workflowRunJobs.workflowRunArtifacts,
-      });
+      if (workflowRunJobs.jobs[i].conclusion === "skipped") {
+        core.info(`Job ${job.id} was skipped, not tracing.`);
+      } else {
+        await traceWorkflowRunJob({
+          parentSpan: rootSpan,
+          parentContext: ROOT_CONTEXT,
+          trace,
+          tracer,
+          job,
+          workflowArtifacts: workflowRunJobs.workflowRunArtifacts,
+        });
+      }
     }
   } finally {
     rootSpan.end(new Date(workflowRunJobs.workflowRun.updated_at));
@@ -194,6 +198,7 @@ async function traceWorkflowRunJob({
     console.warn(`Job ${job.id} is not completed yet`);
     return;
   }
+
   job.name;
   const ctx = trace.setSpan(parentContext, parentSpan);
   const startTime = new Date(job.started_at);
@@ -231,7 +236,9 @@ async function traceWorkflowRunJob({
     span.setStatus({ code });
     const numSteps = job.steps?.length || 0;
     core.debug(`Trace ${numSteps} Steps`);
-    if (job.steps !== undefined) {
+    const enableStepTracing = core.getBooleanInput("enableStepTracing");
+
+    if (job.steps !== undefined && enableStepTracing) {
       for (let i = 0; i < job.steps.length; i++) {
         const step: WorkflowRunJobStep = job.steps[i];
         await traceWorkflowRunStep({
