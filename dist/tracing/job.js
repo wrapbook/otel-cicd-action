@@ -116,10 +116,19 @@ async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
     core.debug(`Root Span: ${rootSpan.spanContext().traceId}: ${workflowRunJobs.workflowRun.created_at}`);
     try {
         if (workflowRunJobs.jobs.length > 0) {
-            const firstJob = workflowRunJobs.jobs[0];
+            const jobs = workflowRunJobs.jobs;
+            let totalDuration = 0;
+            jobs.forEach((job) => {
+                const jobStartTime = new Date(job.started_at).getTime();
+                const jobEndTime = job.completed_at
+                    ? new Date(job.completed_at).getTime()
+                    : 0;
+                const jobDuration = jobEndTime - jobStartTime;
+                totalDuration += jobDuration;
+            });
             const queueCtx = api_1.trace.setSpan(api_1.ROOT_CONTEXT, rootSpan);
             const queueSpan = tracer.startSpan("Queued", { startTime }, queueCtx);
-            queueSpan.end(new Date(firstJob.started_at));
+            queueSpan.end(new Date(startTime.getTime() + totalDuration));
         }
         for (let i = 0; i < workflowRunJobs.jobs.length; i++) {
             const job = workflowRunJobs.jobs[i];
