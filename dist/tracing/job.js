@@ -127,12 +127,18 @@ async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
                 core.info(`Job ${job.id} was skipped, not tracing.`);
             }
             else {
+                const annotations = await octokit.rest.checks.listAnnotations({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    check_run_id: job.id,
+                });
                 await traceWorkflowRunJob({
                     parentSpan: rootSpan,
                     parentContext: api_1.ROOT_CONTEXT,
                     trace: api_1.trace,
                     tracer,
                     job,
+                    jobAnnotations: annotations.data,
                     workflowArtifacts: workflowRunJobs.workflowRunArtifacts,
                 });
             }
@@ -144,7 +150,7 @@ async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
     return rootSpan.spanContext();
 }
 exports.traceWorkflowRunJobs = traceWorkflowRunJobs;
-async function traceWorkflowRunJob({ parentContext, trace, parentSpan, tracer, job, workflowArtifacts, }) {
+async function traceWorkflowRunJob({ parentContext, trace, parentSpan, tracer, job, jobAnnotations, workflowArtifacts, }) {
     core.debug(`Trace Job ${job.id}`);
     if (!job.completed_at) {
         console.warn(`Job ${job.id} is not completed yet`);
@@ -154,6 +160,10 @@ async function traceWorkflowRunJob({ parentContext, trace, parentSpan, tracer, j
     const ctx = trace.setSpan(parentContext, parentSpan);
     const startTime = new Date(job.started_at);
     const completedTime = new Date(job.completed_at);
+    const failureAnnotations = jobAnnotations.filter((a) => a.annotation_level === "failure");
+    const annotationMessages = failureAnnotations
+        .map((a) => a.message)
+        .join(";");
     const span = tracer.startSpan(job.name, {
         attributes: {
             "github.job.id": job.id,
@@ -168,6 +178,7 @@ async function traceWorkflowRunJob({ parentContext, trace, parentSpan, tracer, j
             "github.job.started_at": job.started_at || undefined,
             "github.job.completed_at": job.completed_at || undefined,
             "github.conclusion": job.conclusion || undefined,
+            "github.job.annotations": annotationMessages,
             error: job.conclusion === "failure",
         },
         startTime,

@@ -14,6 +14,8 @@ import {
   WorkflowRunJob,
   WorkflowRunJobStep,
   WorkflowArtifactLookup,
+  WorkflowRunJobAnnotationsResponse,
+  JobAnnotation,
 } from "../github";
 
 import { traceWorkflowRunStep } from "./step";
@@ -160,12 +162,20 @@ export async function traceWorkflowRunJobs({
       if (workflowRunJobs.jobs[i].conclusion === "skipped") {
         core.info(`Job ${job.id} was skipped, not tracing.`);
       } else {
+        const annotations: WorkflowRunJobAnnotationsResponse =
+          await octokit.rest.checks.listAnnotations({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            check_run_id: job.id,
+          });
+
         await traceWorkflowRunJob({
           parentSpan: rootSpan,
           parentContext: ROOT_CONTEXT,
           trace,
           tracer,
           job,
+          jobAnnotations: annotations.data,
           workflowArtifacts: workflowRunJobs.workflowRunArtifacts,
         });
       }
@@ -182,6 +192,7 @@ type TraceWorkflowRunJobParams = {
   trace: TraceAPI;
   tracer: Tracer;
   job: WorkflowRunJob;
+  jobAnnotations: JobAnnotation[];
   workflowArtifacts: WorkflowArtifactLookup;
 };
 
@@ -191,6 +202,7 @@ async function traceWorkflowRunJob({
   parentSpan,
   tracer,
   job,
+  jobAnnotations,
   workflowArtifacts,
 }: TraceWorkflowRunJobParams) {
   core.debug(`Trace Job ${job.id}`);
@@ -203,6 +215,14 @@ async function traceWorkflowRunJob({
   const ctx = trace.setSpan(parentContext, parentSpan);
   const startTime = new Date(job.started_at);
   const completedTime = new Date(job.completed_at);
+
+  const failureAnnotations = jobAnnotations.filter(
+    (a: JobAnnotation) => a.annotation_level === "failure",
+  );
+  const annotationMessages = failureAnnotations
+    .map((a: JobAnnotation) => a.message)
+    .join(";");
+
   const span = tracer.startSpan(
     job.name,
     {
@@ -219,6 +239,7 @@ async function traceWorkflowRunJob({
         "github.job.started_at": job.started_at || undefined,
         "github.job.completed_at": job.completed_at || undefined,
         "github.conclusion": job.conclusion || undefined,
+        "github.job.annotations": annotationMessages,
         error: job.conclusion === "failure",
       },
       startTime,
