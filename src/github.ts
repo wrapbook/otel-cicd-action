@@ -52,6 +52,10 @@ export type WorkflowRunJobs = {
   workflowRunArtifacts: WorkflowArtifactLookup;
 };
 
+export type WorkflowRunJobAnnotationsResponse =
+  RestEndpointMethodTypes["checks"]["listAnnotations"]["response"];
+export type JobAnnotation = WorkflowRunJobAnnotationsResponse["data"][0];
+
 export async function listWorkflowRunArtifacts(
   context: Context,
   octokit: InstanceType<typeof GitHub>,
