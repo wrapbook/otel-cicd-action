@@ -252,6 +252,7 @@ async function traceWorkflowRunJob({
         "github.conclusion": job.conclusion || undefined,
         "github.job.annotations": annotationMessages,
         "github.job.head_branch": job.head_branch || undefined,
+        "github.job.head_sha": job.head_sha || undefined,
         error: job.conclusion === "failure",
       },
       startTime,
