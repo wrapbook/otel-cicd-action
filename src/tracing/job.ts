@@ -125,6 +125,8 @@ export async function traceWorkflowRunJobs({
           workflowRunJobs.workflowRun.head_commit?.message || undefined,
         "github.head_commit.timestamp":
           workflowRunJobs.workflowRun.head_commit?.timestamp || undefined,
+        "github.head_branch":
+          workflowRunJobs.workflowRun.head_branch || undefined,
         "github.head_sha": workflowRunJobs.workflowRun.head_sha,
         "github.head_ref": headRef,
         "github.base_ref": baseRef,
