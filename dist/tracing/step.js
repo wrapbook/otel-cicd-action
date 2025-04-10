@@ -37,12 +37,13 @@ async function traceWorkflowRunStep({ job, parentContext, parentSpan, trace, tra
         console.info(`Step ${step.name} did not run.`);
         return;
     }
-    const ignoredSteps = core
-        .getInput("ignoredSteps")
+    const ignoredSteps = (core.getInput("ignoredSteps") || "")
         .split(",")
-        .map((s) => s.trim().toLowerCase());
-    if (ignoredSteps.some((ignoredStep) => step.name.toLowerCase().startsWith(ignoredStep))) {
-        console.info(`Step ${step.name} is ignored.`);
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean); // Remove empty strings
+    if (ignoredSteps.length > 0 &&
+        ignoredSteps.some((ignoredStep) => step.name.toLowerCase().includes(ignoredStep))) {
+        console.info(`Step ${step.name} is ignored (matches ignored pattern: ${ignoredSteps.join(", ")})`);
         return;
     }
     core.debug(`Trace Step ${step.name}`);
