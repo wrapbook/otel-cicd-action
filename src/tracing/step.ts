@@ -36,17 +36,17 @@ export async function traceWorkflowRunStep({
     return;
   }
 
-  const ignoredSteps = core
-    .getInput("ignoredSteps")
+  const ignoredSteps = (core.getInput("ignoredSteps") || "")
     .split(",")
-    .map((s) => s.trim().toLowerCase());
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean); // Remove empty strings
 
-  if (
+  if (ignoredSteps.length > 0 &&
     ignoredSteps.some((ignoredStep) =>
-      step.name.toLowerCase().startsWith(ignoredStep),
+      step.name.toLowerCase().includes(ignoredStep),
     )
   ) {
-    console.info(`Step ${step.name} is ignored.`);
+    console.info(`Step ${step.name} is ignored (matches ignored pattern: ${ignoredSteps.join(", ")})`);
     return;
   }
 
