@@ -41,12 +41,15 @@ export async function traceWorkflowRunStep({
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean); // Remove empty strings
 
-  if (ignoredSteps.length > 0 &&
+  if (
+    ignoredSteps.length > 0 &&
     ignoredSteps.some((ignoredStep) =>
       step.name.toLowerCase().includes(ignoredStep),
     )
   ) {
-    console.info(`Step ${step.name} is ignored (matches ignored pattern: ${ignoredSteps.join(", ")})`);
+    console.info(
+      `Step ${step.name} is ignored (matches ignored pattern: ${ignoredSteps.join(", ")})`,
+    );
     return;
   }
 
