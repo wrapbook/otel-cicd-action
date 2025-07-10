@@ -35,18 +35,25 @@ export async function run() {
       provider,
       workflowRunJobs,
     });
+    console.log(`Tracing completed successfully`);
     core.setOutput("traceId", spanContext.traceId);
   } finally {
     core.info("Shutdown Trace Provider");
-    setTimeout(() => {
-      provider
-        .shutdown()
-        .then(() => {
-          core.info("Provider shutdown");
-        })
-        .catch((error: Error) => {
-          console.warn(error.message);
-        });
-    }, 2000);
+    // Wait for the shutdown to complete instead of using setTimeout
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        provider
+          .shutdown()
+          .then(() => {
+            core.info("Provider shutdown");
+          })
+          .catch((error: Error) => {
+            console.warn(error.message);
+          })
+          .finally(() => {
+            resolve();
+          });
+      }, 2000);
+    });
   }
 }
