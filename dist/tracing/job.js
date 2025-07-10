@@ -70,6 +70,67 @@ async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
             };
         }, {});
     }
+    let buildkiteTelemetry = {};
+    for (const job of workflowRunJobs.jobs) {
+        if (job.name.toLowerCase().includes("buildkite")) {
+            try {
+                const annotationsResponse = await octokit.rest.checks.listAnnotations({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    check_run_id: job.id,
+                });
+                const telemetryAnnotation = annotationsResponse.data.find((a) => a.annotation_level === "notice" &&
+                    a.path === "buildkite-telemetry" &&
+                    a.message?.includes("buildkite.enabled"));
+                if (telemetryAnnotation && telemetryAnnotation.message) {
+                    try {
+                        buildkiteTelemetry = JSON.parse(telemetryAnnotation.message);
+                    }
+                    catch (e) {
+                        core.debug(`Failed to parse telemetry annotation: ${telemetryAnnotation.message}`);
+                    }
+                    break;
+                }
+            }
+            catch (error) {
+                continue;
+            }
+        }
+    }
+    if (Object.keys(buildkiteTelemetry).length === 0) {
+        // Look for the separate "Buildkite Telemetry" check run
+        try {
+            const checksResponse = await octokit.rest.checks.listForRef({
+                owner: github_1.context.repo.owner,
+                repo: github_1.context.repo.repo,
+                ref: workflowRunJobs.workflowRun.head_sha,
+                check_name: "Buildkite Telemetry",
+            });
+            const telemetryCheck = checksResponse.data.check_runs.find((cr) => cr.name === "Buildkite Telemetry");
+            if (telemetryCheck) {
+                // Fetch annotations for the check run
+                const annotationsResponse = await octokit.rest.checks.listAnnotations({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    check_run_id: telemetryCheck.id,
+                });
+                const telemetryAnnotation = annotationsResponse.data.find((a) => a.annotation_level === "notice" &&
+                    a.path === "buildkite-telemetry" &&
+                    a.message?.includes("buildkite.enabled"));
+                if (telemetryAnnotation && telemetryAnnotation.message) {
+                    try {
+                        buildkiteTelemetry = JSON.parse(telemetryAnnotation.message);
+                    }
+                    catch (e) {
+                        core.debug(`Failed to parse telemetry annotation from check run: ${telemetryAnnotation.message}`);
+                    }
+                }
+            }
+        }
+        catch (error) {
+            // Ignore errors when fetching telemetry check run
+        }
+    }
     const rootSpan = tracer.startSpan(workflowRunJobs.workflowRun.name ||
         `${workflowRunJobs.workflowRun.workflow_id}`, {
         attributes: {
@@ -104,6 +165,7 @@ async function traceWorkflowRunJobs({ provider, workflowRunJobs, }) {
             "github.base_sha": baseSha,
             error: workflowRunJobs.workflowRun.conclusion === "failure",
             ...pull_requests,
+            ...buildkiteTelemetry,
         },
         root: true,
         startTime,
