@@ -10,6 +10,9 @@ import * as path from "path";
 export type OctoKit = InstanceType<typeof GitHub>;
 export type GetWorkflowRunType =
   RestEndpointMethodTypes["actions"]["getWorkflowRun"]["response"];
+export type ReviewAppFailure = {
+  message: string;
+}
 export type ListJobsForWorkflowRunType =
   RestEndpointMethodTypes["actions"]["listJobsForWorkflowRun"]["response"];
 export type WorkflowRunJob = ListJobsForWorkflowRunType["data"]["jobs"][0];
@@ -229,4 +232,15 @@ export async function getWorkflowRunJobs(
     workflowRunArtifacts,
   };
   return workflowRunJobs;
+}
+
+/* istanbul ignore next */
+export async function getReviewAppFailure(
+  octokit: InstanceType<typeof GitHub>,
+  pr: number,
+): Promise<ReviewAppFailure> {
+    
+  const resp = await octokit.request(`GET /repos/wrapbook/app/environments/review-app-${pr}/variables/DEVSPACE_ERROR_MESSAGE`);
+  const reviewAppFailure = {message: resp.data.value};
+  return reviewAppFailure;
 }
