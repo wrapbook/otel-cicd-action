@@ -241,5 +241,6 @@ export async function getReviewAppFailure(
 ): Promise<ReviewAppFailure> {
     
   const resp = await octokit.request(`GET /repos/wrapbook/app/environments/review-app-${pr}/variables/DEVSPACE_ERROR_MESSAGE`);
-  return resp
+  const reviewAppFailure = {message: resp.data.value};
+  return reviewAppFailure;
 }
